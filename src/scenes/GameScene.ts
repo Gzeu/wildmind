@@ -1,5 +1,6 @@
-// ── Game Scene ─────────────────────────────────────────────────
+// ── Game Scene ──────────────────────────────────────────────────
 import { Container, Graphics, Text, TextStyle, Sprite, Assets } from 'pixi.js';
+import { Button } from '@pixi/ui';
 import { Game } from '../Game';
 import { BlurReveal } from '../utils/BlurReveal';
 import { buildChoices } from '../data/animals';
@@ -11,6 +12,42 @@ function calcPoints(blurProgress: number, streak: number): number {
   return Math.max(10, base) + streakBonus;
 }
 
+// Helper: create a choice button using @pixi/ui Button
+function makeChoiceButton(
+  choice: string,
+  btnW: number,
+  btnH: number,
+  defaultColor: number,
+  onPress: () => void
+): Button {
+  const defaultBg = new Graphics()
+    .roundRect(0, 0, btnW, btnH, 10)
+    .fill({ color: defaultColor });
+  const hoverBg = new Graphics()
+    .roundRect(0, 0, btnW, btnH, 10)
+    .fill({ color: 0x2a8c56 });
+  const pressedBg = new Graphics()
+    .roundRect(0, 0, btnW, btnH, 10)
+    .fill({ color: 0x0e6e3a });
+
+  const label = new Text({
+    text: choice,
+    style: new TextStyle({ fill: '#e8f5e9', fontSize: 18, fontFamily: 'Georgia, serif' }),
+  });
+  label.anchor.set(0.5);
+  label.x = btnW / 2;
+  label.y = btnH / 2;
+  defaultBg.addChild(label);
+
+  const btn = new Button({
+    defaultView: defaultBg,
+    hoverView: hoverBg,
+    pressedView: pressedBg,
+  });
+  btn.onPress.connect(onPress);
+  return btn;
+}
+
 export class GameScene extends Container {
   private game: Game;
   private blurReveal: BlurReveal | null = null;
@@ -19,6 +56,8 @@ export class GameScene extends Container {
   private feedbackText: Text | null = null;
   private guessed: boolean = false;
   private ticker: ((t: any) => void) | null = null;
+  // Keep refs to disable buttons after guess
+  private choiceButtons: Button[] = [];
 
   constructor(game: Game) {
     super();
@@ -49,7 +88,7 @@ export class GameScene extends Container {
     // Streak indicator
     if (this.game.state.streak > 1) {
       const streakStyle = new TextStyle({ fill: '#f5c842', fontSize: 14, fontFamily: 'monospace' });
-      const streakText = new Text({ text: `🔥 Streak x${this.game.state.streak}`, style: streakStyle });
+      const streakText = new Text({ text: `\uD83D\uDD25 Streak x${this.game.state.streak}`, style: streakStyle });
       streakText.x = W - 140;
       streakText.y = 16;
       this.addChild(streakText);
@@ -74,7 +113,6 @@ export class GameScene extends Container {
     const imgX = W / 2 - imgSize / 2;
     const imgY = H * 0.1;
 
-    // Placeholder while loading
     const imgBg = new Graphics();
     imgBg.roundRect(imgX, imgY, imgSize, imgSize, 16)
       .fill({ color: 0x1a5c36, alpha: 0.4 });
@@ -93,7 +131,6 @@ export class GameScene extends Container {
       this.addChild(sprite);
       this.animalSprite = sprite;
 
-      // Start blur reveal
       this.blurReveal = new BlurReveal(sprite, {
         initialBlur: 38,
         duration: 9000,
@@ -102,7 +139,6 @@ export class GameScene extends Container {
         },
       });
 
-      // Ticker
       this.ticker = (ticker) => {
         if (!this.guessed) {
           this.blurReveal?.update(ticker.deltaMS);
@@ -119,19 +155,17 @@ export class GameScene extends Container {
       this.addChild(errText);
     }
 
-    // Timer bar background
+    // Timer bar
     const timerBg = new Graphics();
     timerBg.roundRect(imgX, imgY + imgSize + 10, imgSize, 8, 4)
       .fill({ color: 0x1a5c36 });
     timerBg.name = 'timerBg';
     this.addChild(timerBg);
 
-    // Timer bar fill (will be updated)
     const timerFill = new Graphics();
     timerFill.name = 'timerFill';
     this.addChild(timerFill);
 
-    // Timer text
     const timerText = new Text({
       text: '9s',
       style: new TextStyle({ fill: '#a8d5b5', fontSize: 12, fontFamily: 'monospace' })
@@ -141,39 +175,29 @@ export class GameScene extends Container {
     this.addChild(timerText);
     this.timerText = timerText;
 
-    // Choice buttons
+    // ── Choice Buttons via @pixi/ui Button ──
     const choices = buildChoices(animal);
     const btnH = 52;
     const btnGap = 12;
     const totalH = choices.length * (btnH + btnGap) - btnGap;
     const startY = H - totalH - 30;
+    const btnW = Math.min(W * 0.8, 420);
 
     choices.forEach((choice, i) => {
-      const btn = new Graphics();
-      const btnW = Math.min(W * 0.8, 420);
-      const bx = W / 2 - btnW / 2;
-      const by = startY + i * (btnH + btnGap);
-
-      btn.roundRect(bx, by, btnW, btnH, 10).fill({ color: 0x1a5c36 });
-      btn.eventMode = 'static';
-      btn.cursor = 'pointer';
-      btn.on('pointerover', () => { if (!this.guessed) btn.tint = 0x2a8c56; });
-      btn.on('pointerout', () => btn.tint = 0xffffff);
-      btn.on('pointerdown', () => this.handleGuess(choice, btn, choices, animal.name));
-      this.addChild(btn);
-
-      const label = new Text({
-        text: choice,
-        style: new TextStyle({ fill: '#e8f5e9', fontSize: 18, fontFamily: 'Georgia, serif' })
+      const btn = makeChoiceButton(choice, btnW, btnH, 0x1a5c36, () => {
+        this.handleGuess(choice, btn, animal.name);
       });
-      label.anchor.set(0.5);
-      label.x = W / 2;
-      label.y = by + btnH / 2;
-      this.addChild(label);
+      btn.x = W / 2 - btnW / 2;
+      btn.y = startY + i * (btnH + btnGap);
+      this.addChild(btn);
+      this.choiceButtons.push(btn);
     });
 
     // Feedback text
-    const feedbackText = new Text({ text: '', style: new TextStyle({ fill: '#f5c842', fontSize: 22, fontFamily: 'Georgia, serif', fontWeight: 'bold' }) });
+    const feedbackText = new Text({
+      text: '',
+      style: new TextStyle({ fill: '#f5c842', fontSize: 22, fontFamily: 'Georgia, serif', fontWeight: 'bold' })
+    });
     feedbackText.anchor.set(0.5);
     feedbackText.x = W / 2;
     feedbackText.y = H * 0.07;
@@ -188,8 +212,7 @@ export class GameScene extends Container {
     if (this.timerText) this.timerText.text = `${secsLeft}s`;
 
     const fill = this.getChildByName('timerFill') as Graphics | null;
-    const bg = this.getChildByName('timerBg') as Graphics | null;
-    if (!fill || !bg) return;
+    if (!fill) return;
     const W = this.game.app.screen.width;
     const H = this.game.app.screen.height;
     const imgSize = Math.min(W * 0.55, H * 0.48);
@@ -204,9 +227,12 @@ export class GameScene extends Container {
     }
   }
 
-  private handleGuess(choice: string, btn: Graphics, allBtns: string[], correctName: string): void {
+  private handleGuess(choice: string, btn: Button, correctName: string): void {
     if (this.guessed) return;
     this.guessed = true;
+
+    // Disable all buttons after guess
+    this.choiceButtons.forEach(b => (b.enabled = false));
 
     const isCorrect = choice === correctName;
     const blurProgress = this.blurReveal?.progress ?? 1;
@@ -214,40 +240,44 @@ export class GameScene extends Container {
     if (isCorrect) {
       const pts = calcPoints(blurProgress, this.game.state.streak);
       this.game.onCorrectGuess(pts);
-      btn.tint = 0x4caf50;
+      // Tint correct button green
+      (btn.defaultView as Graphics).tint = 0x4caf50;
       if (this.feedbackText) {
         this.feedbackText.text = `+${pts} pts! ${this.game.currentAnimal.emoji}`;
         this.feedbackText.style.fill = '#4caf50';
       }
     } else {
       this.game.onWrongGuess();
-      btn.tint = 0xf44336;
+      (btn.defaultView as Graphics).tint = 0xf44336;
       if (this.feedbackText) {
         this.feedbackText.text = `It was ${correctName} ${this.game.currentAnimal.emoji}`;
         this.feedbackText.style.fill = '#f44336';
       }
     }
 
-    // Reveal the image
     this.blurReveal?.reveal();
 
-    // Show fun fact
+    // Fun fact
     const W = this.game.app.screen.width;
     const H = this.game.app.screen.height;
-    const factStyle = new TextStyle({ fill: '#a8d5b5', fontSize: 13, fontFamily: 'Georgia, serif', fontStyle: 'italic', wordWrap: true, wordWrapWidth: W * 0.7 });
+    const factStyle = new TextStyle({
+      fill: '#a8d5b5', fontSize: 13, fontFamily: 'Georgia, serif',
+      fontStyle: 'italic', wordWrap: true, wordWrapWidth: W * 0.7
+    });
     const fact = new Text({ text: `Fun fact: ${this.game.currentAnimal.funFact}`, style: factStyle });
     fact.anchor.set(0.5);
     fact.x = W / 2;
     fact.y = H * 0.13;
     this.addChild(fact);
 
-    // Next button after 2s
     setTimeout(() => {
       if (!this.destroyed) this.game.nextRound();
     }, 2200);
   }
 
   private handleTimeout(): void {
+    this.guessed = true;
+    this.choiceButtons.forEach(b => (b.enabled = false));
     this.game.onWrongGuess();
     if (this.feedbackText) {
       this.feedbackText.text = `Time's up! It was ${this.game.currentAnimal.name} ${this.game.currentAnimal.emoji}`;
