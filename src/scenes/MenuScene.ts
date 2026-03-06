@@ -1,5 +1,6 @@
-// ── Menu Scene ─────────────────────────────────────────────────
-import { Container, Graphics, Text, TextStyle, Sprite, Assets } from 'pixi.js';
+// ── Menu Scene ──────────────────────────────────────────────────
+Import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import { Button } from '@pixi/ui';
 import { Game } from '../Game';
 
 export class MenuScene extends Container {
@@ -15,7 +16,7 @@ export class MenuScene extends Container {
     const W = this.game.app.screen.width;
     const H = this.game.app.screen.height;
 
-    // Background gradient effect
+    // Background
     const bg = new Graphics();
     bg.rect(0, 0, W, H).fill({ color: 0x0d2b1e });
     this.addChild(bg);
@@ -60,7 +61,7 @@ export class MenuScene extends Container {
     this.addChild(tagline);
 
     // Emoji animals decoration
-    const emojis = ['🦁', '🐘', '🦒', '🐧', '🐙'];
+    const emojis = ['\u{1F981}', '\u{1F418}', '\u{1F992}', '\u{1F427}', '\u{1F419}'];
     emojis.forEach((emoji, i) => {
       const emojiStyle = new TextStyle({ fontSize: 42 });
       const e = new Text({ text: emoji, style: emojiStyle });
@@ -70,33 +71,49 @@ export class MenuScene extends Container {
       this.addChild(e);
     });
 
-    // Play button
-    const btnBg = new Graphics();
+    // ── Play Button via @pixi/ui ──
     const btnW = 260;
     const btnH = 68;
-    const btnX = W / 2 - btnW / 2;
-    const btnY = H * 0.64;
 
-    btnBg.roundRect(btnX, btnY, btnW, btnH, 34)
+    // Default state background
+    const defaultBg = new Graphics()
+      .roundRect(0, 0, btnW, btnH, 34)
       .fill({ color: 0xf5c842 });
-    btnBg.eventMode = 'static';
-    btnBg.cursor = 'pointer';
-    btnBg.on('pointerover', () => btnBg.tint = 0xffe080);
-    btnBg.on('pointerout', () => btnBg.tint = 0xffffff);
-    btnBg.on('pointerdown', () => this.game.startNewGame());
-    this.addChild(btnBg);
 
-    const btnStyle = new TextStyle({
-      fontFamily: 'Georgia, serif',
-      fontSize: 26,
-      fontWeight: 'bold',
-      fill: '#0d2b1e',
+    // Hover state background
+    const hoverBg = new Graphics()
+      .roundRect(0, 0, btnW, btnH, 34)
+      .fill({ color: 0xffe080 });
+
+    // Pressed state background
+    const pressedBg = new Graphics()
+      .roundRect(0, 0, btnW, btnH, 34)
+      .fill({ color: 0xe0b030 });
+
+    const playBtn = new Button({
+      defaultView: defaultBg,
+      hoverView: hoverBg,
+      pressedView: pressedBg,
     });
-    const btnText = new Text({ text: 'Play Now', style: btnStyle });
-    btnText.anchor.set(0.5);
-    btnText.x = W / 2;
-    btnText.y = btnY + btnH / 2;
-    this.addChild(btnText);
+
+    const btnLabel = new Text({
+      text: 'Play Now',
+      style: new TextStyle({
+        fontFamily: 'Georgia, serif',
+        fontSize: 26,
+        fontWeight: 'bold',
+        fill: '#0d2b1e',
+      }),
+    });
+    btnLabel.anchor.set(0.5);
+    btnLabel.x = btnW / 2;
+    btnLabel.y = btnH / 2;
+    defaultBg.addChild(btnLabel);
+
+    playBtn.x = W / 2 - btnW / 2;
+    playBtn.y = H * 0.64;
+    playBtn.onPress.connect(() => this.game.startNewGame());
+    this.addChild(playBtn);
 
     // Footer
     const footerStyle = new TextStyle({ fill: '#2d5c3e', fontSize: 12, fontFamily: 'monospace' });
