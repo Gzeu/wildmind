@@ -9,7 +9,6 @@ export interface BlurRevealOptions {
   initialBlur?: number;
   /** Duration in milliseconds to fully reveal (default: 8000) */
   duration?: number;
-  /** Steps of blur reduction per tick (default: auto from duration) */
   onRevealComplete?: () => void;
 }
 
@@ -56,6 +55,7 @@ export class BlurReveal {
 
   /** Instantly reveal (e.g. on correct guess) */
   reveal(): void {
+    if (this.complete) return; // guard against double-fire
     this.complete = true;
     this.blurFilter.strength = 0;
     this.onComplete?.();

@@ -9,6 +9,8 @@ import { ResultScene } from './scenes/ResultScene';
 
 export type SceneName = 'menu' | 'game' | 'result';
 
+export const TOTAL_ROUNDS = 5;
+
 export interface GameState {
   score: number;
   streak: number;
@@ -29,7 +31,7 @@ export class Game {
     score: 0,
     streak: 0,
     round: 0,
-    totalRounds: 5,
+    totalRounds: TOTAL_ROUNDS,
     animals: [],
     currentAnimalIndex: 0,
     lastWasCorrect: false,
@@ -47,8 +49,8 @@ export class Game {
       score: 0,
       streak: 0,
       round: 0,
-      totalRounds: 5,
-      animals: getRandomAnimals(5),
+      totalRounds: TOTAL_ROUNDS,
+      animals: getRandomAnimals(TOTAL_ROUNDS),
       currentAnimalIndex: 0,
       lastWasCorrect: false,
       pointsEarned: 0,
@@ -85,13 +87,11 @@ export class Game {
   }
 
   goTo(scene: SceneName): void {
-    // Destroy previous scene
     if (this.currentScene) {
       this.sceneContainer.removeChild(this.currentScene);
       this.currentScene.destroy({ children: true });
     }
 
-    // Create new scene
     let next: Container;
     switch (scene) {
       case 'menu':
