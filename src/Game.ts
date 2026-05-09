@@ -26,6 +26,7 @@ export interface GameState {
 export class Game {
   readonly app: Application;
   private currentScene: Container | null = null;
+  private currentSceneName: SceneName = 'menu';
   private sceneContainer: Container;
   readonly transition: SceneTransition;
 
@@ -64,12 +65,7 @@ export class Game {
   nextRound(): void {
     this.state.currentAnimalIndex++;
     this.state.round++;
-
-    if (this.state.currentAnimalIndex >= this.state.animals.length) {
-      this.goTo('result');
-    } else {
-      this.goTo('game');
-    }
+    this.goTo(this.state.currentAnimalIndex >= this.state.animals.length ? 'result' : 'game');
   }
 
   onCorrectGuess(pointsEarned: number): void {
@@ -89,28 +85,29 @@ export class Game {
     return this.state.animals[this.state.currentAnimalIndex];
   }
 
+  /** Rebuild the current scene in-place (used on window resize) */
+  rebuildCurrentScene(): void {
+    this._swapScene(this.currentSceneName);
+  }
+
   goTo(scene: SceneName): void {
-    this.transition.crossfade(() => {
-      if (this.currentScene) {
-        this.sceneContainer.removeChild(this.currentScene);
-        this.currentScene.destroy({ children: true });
-      }
+    this.transition.crossfade(() => this._swapScene(scene));
+  }
 
-      let next: Container;
-      switch (scene) {
-        case 'menu':
-          next = new MenuScene(this);
-          break;
-        case 'game':
-          next = new GameScene(this);
-          break;
-        case 'result':
-          next = new ResultScene(this);
-          break;
-      }
+  private _swapScene(scene: SceneName): void {
+    if (this.currentScene) {
+      this.sceneContainer.removeChild(this.currentScene);
+      this.currentScene.destroy({ children: true });
+    }
 
-      this.currentScene = next;
-      this.sceneContainer.addChild(next);
-    });
+    this.currentSceneName = scene;
+    let next: Container;
+    switch (scene) {
+      case 'menu':   next = new MenuScene(this);   break;
+      case 'game':   next = new GameScene(this);   break;
+      case 'result': next = new ResultScene(this); break;
+    }
+    this.currentScene = next;
+    this.sceneContainer.addChild(next);
   }
 }

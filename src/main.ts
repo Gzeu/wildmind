@@ -1,9 +1,8 @@
-// ── WildMind — Entry Point ─────────────────────────────────────────────
+// ── WildMind — Entry Point ───────────────────────────────────────────
 import { Application } from 'pixi.js';
 import { Game } from './Game';
 
 (async () => {
-  // Create and init PixiJS application
   const app = new Application();
   await app.init({
     resizeTo: window,
@@ -15,12 +14,16 @@ import { Game } from './Game';
 
   document.body.appendChild(app.canvas);
 
-  // Create game and start at menu
   const game = new Game(app);
   game.goTo('menu');
 
-  // Handle resize
+  // Rebuild current scene on window resize for correct layout
+  let resizeTimer: ReturnType<typeof setTimeout>;
   window.addEventListener('resize', () => {
-    app.renderer.resize(window.innerWidth, window.innerHeight);
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      app.renderer.resize(window.innerWidth, window.innerHeight);
+      game.rebuildCurrentScene();
+    }, 150);
   });
 })();

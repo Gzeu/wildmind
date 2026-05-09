@@ -12,6 +12,7 @@ export interface Animal {
 }
 
 export const ANIMALS: Animal[] = [
+  // ─── EASY ─────────────────────────────────────────────────────
   {
     id: 'lion',
     name: 'Lion',
@@ -64,8 +65,27 @@ export const ANIMALS: Animal[] = [
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Lesser_Flamingo_%28Phoeniconaias_minor%29.jpg/640px-Lesser_Flamingo_%28Phoeniconaias_minor%29.jpg',
     difficulty: 'easy',
     wrongOptions: ['Heron', 'Ibis', 'Spoonbill'],
-    funFact: 'Flamingos get their pink color from the carotenoid pigments in the algae and crustaceans they eat.',
+    funFact: 'Flamingos get their pink colour from carotenoid pigments in the algae and crustaceans they eat.',
   },
+  {
+    id: 'gorilla',
+    name: 'Gorilla',
+    emoji: '🦍',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Gorille_des_plaines_de_l%27ouest_%28gorilla_gorilla_gorilla%29_-_Jos%C3%A9_Gon%C3%A7alves_de_Faria.jpg/640px-Gorille_des_plaines_de_l%27ouest_%28gorilla_gorilla_gorilla%29_-_Jos%C3%A9_Gon%C3%A7alves_de_Faria.jpg',
+    difficulty: 'easy',
+    wrongOptions: ['Chimpanzee', 'Orangutan', 'Baboon'],
+    funFact: 'Gorillas share about 98.3% of their DNA with humans.',
+  },
+  {
+    id: 'panda',
+    name: 'Giant Panda',
+    emoji: '🐼',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Grosser_Panda.JPG/640px-Grosser_Panda.JPG',
+    difficulty: 'easy',
+    wrongOptions: ['Red Panda', 'Sloth Bear', 'Sun Bear'],
+    funFact: 'Giant pandas spend 10-16 hours per day eating bamboo to meet their energy needs.',
+  },
+  // ─── MEDIUM ───────────────────────────────────────────────
   {
     id: 'cheetah',
     name: 'Cheetah',
@@ -100,8 +120,36 @@ export const ANIMALS: Animal[] = [
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Mantis_shrimp_from_front.jpg/640px-Mantis_shrimp_from_front.jpg',
     difficulty: 'medium',
     wrongOptions: ['Lobster', 'Crayfish', 'Shrimp'],
-    funFact: 'Mantis shrimp can see 16 types of color receptors, compared to 3 in humans.',
+    funFact: 'Mantis shrimp can see 16 types of colour receptors, compared to 3 in humans.',
   },
+  {
+    id: 'platypus',
+    name: 'Platypus',
+    emoji: '🦦',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Platypus-sketch.jpg/640px-Platypus-sketch.jpg',
+    difficulty: 'medium',
+    wrongOptions: ['Otter', 'Beaver', 'Muskrat'],
+    funFact: 'The platypus is one of only five mammal species that lay eggs instead of giving birth.',
+  },
+  {
+    id: 'capybara',
+    name: 'Capybara',
+    emoji: '🦡',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Capybara_%28Hydrochoerus_hydrochaeris%29.JPG/640px-Capybara_%28Hydrochoerus_hydrochaeris%29.JPG',
+    difficulty: 'medium',
+    wrongOptions: ['Beaver', 'Nutria', 'Guinea Pig'],
+    funFact: "The capybara is the world's largest rodent, weighing up to 65 kg.",
+  },
+  {
+    id: 'manta',
+    name: 'Manta Ray',
+    emoji: '🐟',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Manta_birostris-Thailand4.jpg/640px-Manta_birostris-Thailand4.jpg',
+    difficulty: 'medium',
+    wrongOptions: ['Stingray', 'Eagle Ray', 'Electric Ray'],
+    funFact: 'Manta rays have the largest brain-to-body ratio of any cold-blooded fish.',
+  },
+  // ─── HARD ─────────────────────────────────────────────────
   {
     id: 'axolotl',
     name: 'Axolotl',
@@ -136,25 +184,42 @@ export const ANIMALS: Animal[] = [
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Psychrolutes_marcidus.jpg/640px-Psychrolutes_marcidus.jpg',
     difficulty: 'hard',
     wrongOptions: ['Anglerfish', 'Gulper Eel', 'Fangtooth Fish'],
-    funFact: 'Blobfish look normal underwater at high pressure — the melted face appearance only happens when brought to the surface.',
+    funFact: 'Blobfish look normal underwater at high pressure — the melted face appears only when brought to the surface.',
+  },
+  {
+    id: 'fossa',
+    name: 'Fossa',
+    emoji: '🐱',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Cryptoprocta_ferox_amelie.jpg/640px-Cryptoprocta_ferox_amelie.jpg',
+    difficulty: 'hard',
+    wrongOptions: ['Civet', 'Mongoose', 'Binturong'],
+    funFact: 'The fossa is the largest carnivore native to Madagascar and looks like a cross between a cat and a dog.',
+  },
+  {
+    id: 'irrawaddy',
+    name: 'Irrawaddy Dolphin',
+    emoji: '🐬',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Irrawaddy_dolphin_at_surface.jpg/640px-Irrawaddy_dolphin_at_surface.jpg',
+    difficulty: 'hard',
+    wrongOptions: ['Beluga Whale', 'Porpoise', 'Spinner Dolphin'],
+    funFact: 'The Irrawaddy dolphin has a blunt rounded head with no distinct beak, and spits water to herd fish.',
   },
 ];
 
 export function getRandomAnimals(count: number): Animal[] {
-  // Stratified shuffle: try to include at least one of each difficulty
   const easy = ANIMALS.filter(a => a.difficulty === 'easy');
   const medium = ANIMALS.filter(a => a.difficulty === 'medium');
   const hard = ANIMALS.filter(a => a.difficulty === 'hard');
 
   const shuffle = <T>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
+  // Guarantee at least 2 easy, 2 medium, 1 hard in every session
   const picks: Animal[] = [
     ...shuffle(easy).slice(0, 2),
     ...shuffle(medium).slice(0, 2),
     ...shuffle(hard).slice(0, 1),
   ];
 
-  // Fill remaining if count > 5 or above picked
   if (picks.length < count) {
     const remaining = ANIMALS.filter(a => !picks.includes(a));
     picks.push(...shuffle(remaining).slice(0, count - picks.length));
@@ -164,10 +229,7 @@ export function getRandomAnimals(count: number): Animal[] {
 }
 
 export function buildChoices(correct: Animal): string[] {
-  const wrong = correct.wrongOptions.slice(0, 3);
-  // Safety: pad with generic options if somehow fewer than 3 wrong options exist
-  const padded = [...wrong];
-  while (padded.length < 3) padded.push('Unknown Animal');
-  const all = [...padded, correct.name].sort(() => Math.random() - 0.5);
-  return all;
+  const wrong = [...correct.wrongOptions.slice(0, 3)];
+  while (wrong.length < 3) wrong.push('Unknown Animal');
+  return [...wrong, correct.name].sort(() => Math.random() - 0.5);
 }

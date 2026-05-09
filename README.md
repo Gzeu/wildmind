@@ -2,20 +2,26 @@
 
 > **How wild is your mind?** A progressive animal guessing puzzle game built with PixiJS 8 & TypeScript.
 
+## Live Demo
+
+Deploys automatically to GitHub Pages on every push to `main`.
+
 ## Overview
 
 WildMind is a browser-based game where players are shown a progressively revealed (blur-to-clear) image of an animal and must guess what it is before the image fully unblurs. The faster you guess, the higher your score!
 
 ## Features
 
-- 🔮 **Progressive blur reveal** — PixiJS 8 filters with ease-out animation over 9 seconds
-- 🎥 **14 animals** across Easy / Medium / Hard difficulty, stratified per round
-- 🏆 **High score persistence** — localStorage, visible on Menu and Results screen
+- 🔮 **Progressive blur reveal** — ease-out animation over 9 seconds
+- 🎥 **20 animals** across Easy / Medium / Hard difficulty, stratified per round
+- ⌨️ **Keyboard shortcuts** — press `1`–`4` to select answers
+- 🏆 **High score persistence** — localStorage, shown on Menu and Results
 - 🔥 **Streak bonuses** — consecutive correct guesses multiply your score
 - 🎉 **Scene transitions** — smooth black crossfade between all scenes
-- 🔊 **Procedural sound effects** — correct, wrong, tick, and fanfare via Web Audio API (no assets)
-- 📱 **Responsive** — resizes to any screen size
+- 🔊 **Procedural sound effects** — correct, wrong, tick, fanfare via Web Audio API
+- 📱 **Responsive** — rebuilds layout on window resize
 - ✅ **Fully typed** with strict TypeScript
+- 🚀 **CI/CD** — auto-deploy to GitHub Pages via GitHub Actions
 
 ## Rank System
 
@@ -31,30 +37,34 @@ WildMind is a browser-based game where players are shown a progressively reveale
 
 - [PixiJS 8](https://pixijs.com) — 2D rendering engine
 - [@pixi/ui](https://github.com/pixijs/ui) — interactive Button components
-- TypeScript 5 (strict mode) — type-safe game logic
-- Vite 5 — fast bundler and dev server
-- Web Audio API — procedural sound (no external files)
+- TypeScript 5 (strict mode)
+- Vite 5
+- Web Audio API — procedural sound, no external files
 
 ## Project Structure
 
 ```
 wildmind/
+├── .github/workflows/
+│   └── deploy.yml           # CI/CD → GitHub Pages
 ├── src/
 │   ├── data/
-│   │   └── animals.ts          # 14 animals, stratified shuffle, choice builder
+│   │   └── animals.ts           # 20 animals, stratified shuffle
 │   ├── scenes/
-│   │   ├── MenuScene.ts        # Title screen + high score display
-│   │   ├── GameScene.ts        # Core gameplay: blur reveal, timer, choices
-│   │   └── ResultScene.ts      # Score, rank, new record banner, replay
+│   │   ├── MenuScene.ts
+│   │   ├── GameScene.ts
+│   │   └── ResultScene.ts
 │   ├── services/
-│   │   ├── AnimalAPI.ts        # Wikipedia image fetcher (optional/future)
-│   │   └── HighScore.ts        # localStorage high score persistence
+│   │   ├── AnimalAPI.ts         # Wikipedia fetcher (future use)
+│   │   └── HighScore.ts         # localStorage persistence
 │   ├── utils/
-│   │   ├── BlurReveal.ts       # Blur filter animation utility
-│   │   ├── SceneTransition.ts  # Crossfade between scenes
-│   │   └── SoundManager.ts     # Procedural Web Audio sound effects
-│   ├── Game.ts             # State manager + scene router
-│   └── main.ts             # Entry point
+│   │   ├── BlurReveal.ts
+│   │   ├── KeyboardHandler.ts   # 1–4 keyboard shortcuts
+│   │   ├── Responsive.ts        # Layout scale helpers
+│   │   ├── SceneTransition.ts
+│   │   └── SoundManager.ts
+│   ├── Game.ts              # State + scene router + resize rebuild
+│   └── main.ts
 ├── index.html
 ├── package.json
 ├── tsconfig.json
@@ -65,19 +75,16 @@ wildmind/
 
 ```bash
 npm install
-npm run dev
+npm run dev      # localhost:3000
+npm run build    # → dist/
+npm run preview  # preview production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+## Deploy
 
-## Build for Production
+Push to `main` → GitHub Actions builds and deploys automatically to GitHub Pages.
 
-```bash
-npm run build
-npm run preview
-```
-
-Output is in `dist/` — deploy to any static host (Vercel, Netlify, GitHub Pages).
+For manual deploy to Vercel / Netlify: point the build command to `npm run build` and the publish directory to `dist`.
 
 ## License
 
