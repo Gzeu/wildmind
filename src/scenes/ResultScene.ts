@@ -3,6 +3,7 @@ import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import { Button } from '@pixi/ui';
 import { Game } from '../Game';
 import { saveHighScore, getHighScore } from '../services/HighScore';
+import { soundManager } from '../utils/SoundManager';
 
 function getRank(score: number): { label: string; emoji: string; color: string } {
   if (score >= 450) return { label: 'WildMind Master', emoji: '🏆', color: '#f5c842' };
@@ -29,6 +30,8 @@ export class ResultScene extends Container {
     const isNewRecord = saveHighScore(score);
     const highScore = getHighScore();
 
+    soundManager.playFanfare();
+
     // BG
     const bg = new Graphics();
     bg.rect(0, 0, W, H).fill({ color: 0x0d2b1e });
@@ -45,11 +48,8 @@ export class ResultScene extends Container {
     // New record banner
     if (isNewRecord) {
       const newRecordStyle = new TextStyle({
-        fontFamily: 'Georgia, serif',
-        fontSize: 16,
-        fontWeight: 'bold',
-        fill: '#f5c842',
-        fontStyle: 'italic',
+        fontFamily: 'Georgia, serif', fontSize: 16, fontWeight: 'bold',
+        fill: '#f5c842', fontStyle: 'italic',
       });
       const newRecord = new Text({ text: '🎉 New Personal Record!', style: newRecordStyle });
       newRecord.anchor.set(0.5);
@@ -59,34 +59,27 @@ export class ResultScene extends Container {
     }
 
     // Rank emoji
-    const emojiStyle = new TextStyle({ fontSize: 72 });
-    const rankEmoji = new Text({ text: rank.emoji, style: emojiStyle });
+    const rankEmoji = new Text({ text: rank.emoji, style: new TextStyle({ fontSize: 72 }) });
     rankEmoji.anchor.set(0.5);
     rankEmoji.x = W / 2;
     rankEmoji.y = H * 0.2;
     this.addChild(rankEmoji);
 
     // Rank label
-    const rankStyle = new TextStyle({
-      fontFamily: 'Georgia, serif',
-      fontSize: 32,
-      fontWeight: 'bold',
-      fill: rank.color,
+    const rankLabel = new Text({
+      text: rank.label,
+      style: new TextStyle({ fontFamily: 'Georgia, serif', fontSize: 32, fontWeight: 'bold', fill: rank.color }),
     });
-    const rankLabel = new Text({ text: rank.label, style: rankStyle });
     rankLabel.anchor.set(0.5);
     rankLabel.x = W / 2;
     rankLabel.y = H * 0.34;
     this.addChild(rankLabel);
 
     // Score
-    const scoreStyle = new TextStyle({
-      fontFamily: 'Georgia, serif',
-      fontSize: 56,
-      fontWeight: 'bold',
-      fill: '#f5c842',
+    const scoreTxt = new Text({
+      text: `${score}`,
+      style: new TextStyle({ fontFamily: 'Georgia, serif', fontSize: 56, fontWeight: 'bold', fill: '#f5c842' }),
     });
-    const scoreTxt = new Text({ text: `${score}`, style: scoreStyle });
     scoreTxt.anchor.set(0.5);
     scoreTxt.x = W / 2;
     scoreTxt.y = H * 0.46;
@@ -101,33 +94,24 @@ export class ResultScene extends Container {
     scoreLabel.y = H * 0.54;
     this.addChild(scoreLabel);
 
-    // High score display
-    const hsStyle = new TextStyle({ fill: '#f5c842', fontSize: 13, fontFamily: 'monospace' });
-    const hsTxt = new Text({ text: `🏆 Best: ${highScore} pts`, style: hsStyle });
+    // High score
+    const hsTxt = new Text({
+      text: `🏆 Best: ${highScore} pts`,
+      style: new TextStyle({ fill: '#f5c842', fontSize: 13, fontFamily: 'monospace' }),
+    });
     hsTxt.anchor.set(0.5);
     hsTxt.x = W / 2;
     hsTxt.y = H * 0.6;
     this.addChild(hsTxt);
 
-    // ── Play Again button via @pixi/ui ──
+    // ── Play Again button ──
     const btnW = 260;
     const btnH = 62;
 
-    const playDefaultBg = new Graphics()
-      .roundRect(0, 0, btnW, btnH, 31)
-      .fill({ color: 0xf5c842 });
-    const playHoverBg = new Graphics()
-      .roundRect(0, 0, btnW, btnH, 31)
-      .fill({ color: 0xffe080 });
-    const playPressedBg = new Graphics()
-      .roundRect(0, 0, btnW, btnH, 31)
-      .fill({ color: 0xe0b030 });
-
-    const playBtn = new Button({
-      defaultView: playDefaultBg,
-      hoverView: playHoverBg,
-      pressedView: playPressedBg,
-    });
+    const playDefaultBg = new Graphics().roundRect(0, 0, btnW, btnH, 31).fill({ color: 0xf5c842 });
+    const playHoverBg = new Graphics().roundRect(0, 0, btnW, btnH, 31).fill({ color: 0xffe080 });
+    const playPressedBg = new Graphics().roundRect(0, 0, btnW, btnH, 31).fill({ color: 0xe0b030 });
+    const playBtn = new Button({ defaultView: playDefaultBg, hoverView: playHoverBg, pressedView: playPressedBg });
     const playLabel = new Text({
       text: 'Play Again',
       style: new TextStyle({ fontFamily: 'Georgia, serif', fontSize: 24, fontWeight: 'bold', fill: '#0d2b1e' }),
@@ -141,27 +125,13 @@ export class ResultScene extends Container {
     playBtn.onPress.connect(() => this.game.startNewGame());
     this.addChild(playBtn);
 
-    // ── Menu button via @pixi/ui ──
+    // ── Menu button ──
     const menuW = 180;
     const menuH = 44;
-
-    const menuDefaultBg = new Graphics()
-      .roundRect(0, 0, menuW, menuH, 22)
-      .stroke({ color: 0xa8d5b5, width: 2 });
-    const menuHoverBg = new Graphics()
-      .roundRect(0, 0, menuW, menuH, 22)
-      .fill({ color: 0x1a5c36 })
-      .stroke({ color: 0xa8d5b5, width: 2 });
-    const menuPressedBg = new Graphics()
-      .roundRect(0, 0, menuW, menuH, 22)
-      .fill({ color: 0x0e3d22 })
-      .stroke({ color: 0xa8d5b5, width: 2 });
-
-    const menuBtn = new Button({
-      defaultView: menuDefaultBg,
-      hoverView: menuHoverBg,
-      pressedView: menuPressedBg,
-    });
+    const menuDefaultBg = new Graphics().roundRect(0, 0, menuW, menuH, 22).stroke({ color: 0xa8d5b5, width: 2 });
+    const menuHoverBg = new Graphics().roundRect(0, 0, menuW, menuH, 22).fill({ color: 0x1a5c36 }).stroke({ color: 0xa8d5b5, width: 2 });
+    const menuPressedBg = new Graphics().roundRect(0, 0, menuW, menuH, 22).fill({ color: 0x0e3d22 }).stroke({ color: 0xa8d5b5, width: 2 });
+    const menuBtn = new Button({ defaultView: menuDefaultBg, hoverView: menuHoverBg, pressedView: menuPressedBg });
     const menuLabel = new Text({
       text: 'Main Menu',
       style: new TextStyle({ fill: '#a8d5b5', fontSize: 16, fontFamily: 'Georgia, serif' }),
@@ -175,7 +145,7 @@ export class ResultScene extends Container {
     menuBtn.onPress.connect(() => this.game.goTo('menu'));
     this.addChild(menuBtn);
 
-    // WildMind watermark
+    // Watermark
     const wm = new Text({
       text: 'WildMind — How wild is your mind?',
       style: new TextStyle({ fill: '#1a5c36', fontSize: 11, fontFamily: 'monospace' }),

@@ -6,6 +6,7 @@ import { Animal, getRandomAnimals } from './data/animals';
 import { MenuScene } from './scenes/MenuScene';
 import { GameScene } from './scenes/GameScene';
 import { ResultScene } from './scenes/ResultScene';
+import { SceneTransition } from './utils/SceneTransition';
 
 export type SceneName = 'menu' | 'game' | 'result';
 
@@ -26,6 +27,7 @@ export class Game {
   readonly app: Application;
   private currentScene: Container | null = null;
   private sceneContainer: Container;
+  readonly transition: SceneTransition;
 
   state: GameState = {
     score: 0,
@@ -42,6 +44,7 @@ export class Game {
     this.app = app;
     this.sceneContainer = new Container();
     this.app.stage.addChild(this.sceneContainer);
+    this.transition = new SceneTransition(app);
   }
 
   startNewGame(): void {
@@ -87,25 +90,27 @@ export class Game {
   }
 
   goTo(scene: SceneName): void {
-    if (this.currentScene) {
-      this.sceneContainer.removeChild(this.currentScene);
-      this.currentScene.destroy({ children: true });
-    }
+    this.transition.crossfade(() => {
+      if (this.currentScene) {
+        this.sceneContainer.removeChild(this.currentScene);
+        this.currentScene.destroy({ children: true });
+      }
 
-    let next: Container;
-    switch (scene) {
-      case 'menu':
-        next = new MenuScene(this);
-        break;
-      case 'game':
-        next = new GameScene(this);
-        break;
-      case 'result':
-        next = new ResultScene(this);
-        break;
-    }
+      let next: Container;
+      switch (scene) {
+        case 'menu':
+          next = new MenuScene(this);
+          break;
+        case 'game':
+          next = new GameScene(this);
+          break;
+        case 'result':
+          next = new ResultScene(this);
+          break;
+      }
 
-    this.currentScene = next;
-    this.sceneContainer.addChild(next);
+      this.currentScene = next;
+      this.sceneContainer.addChild(next);
+    });
   }
 }
